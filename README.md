@@ -1,7 +1,7 @@
-# dashSCTE35
-## Parse DASH Events for SCTE-35.
+# dashscte35
+## Parse SCTE-35 in DASH.
 * Xml and Binary Schemas are Supported. 
-* Powered  by threefive.
+* Of course it's powered by [threefive](https://github.com/futzu/threefive)
 
 # Using:
 * parsing requires just three lines of code
