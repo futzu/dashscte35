@@ -1,7 +1,6 @@
 """
 dashscte35.py converting dash SCTE-35 to a threefive.Cue instance.
 """
-
 import json
 import xml.parsers.expat
 import threefive
@@ -68,19 +67,14 @@ class DashSCTE35:
         start_element for expat
         """
         self.active = name.split(":")[-1]
-        # if self.active not in self.stuff:
         self.stuff[self.active] = {}
-        if name == "scte35:SpliceInsert":
-            self.stuff["SpliceInfoSection"]["splice_command_type"] = 5
-        if name == "scte35:TimeSignal":
-            self.stuff["SpliceInfoSection"]["splice_command_type"] = 6
         self._iter_attrs(attrs)
 
     def char_data(self, data):
         """
         char_data CharacterDataHandler for expat
         """
-        data = data.replace(" ", "").replace("\n", "")
+        data=data.replace(' ','').replace('\n','')
         if data:
             self.stuff[self.active][convert_k(self.active)] = data
 
@@ -124,8 +118,8 @@ class DashSCTE35:
         """
         cmd = threefive.TimeSignal()
         if "SpliceTime" in self.stuff:
+            cmd.load(self.stuff['SpliceTime'])
             cmd.time_specified_flag = True
-            cmd.pts_time = self.stuff["SpliceTime"]["pts_time"]
         return cmd
 
     def _build_splice_command(self, cue):
@@ -133,8 +127,7 @@ class DashSCTE35:
         build_splice_command determines whether to build
         a SpliceInsert or TimeSignal and builds it.
         """
-        sct = cue.info_section.splice_command_type
-        cue.command = (self._build_splice_insert, self._build_time_signal)[sct == 6]()
+        cue.command = (self._build_splice_insert, self._build_time_signal)["TimeSignal" in self.stuff]()
         return cue
 
     def _chk_sub_segments(self, dscptr):
@@ -190,6 +183,7 @@ class DashSCTE35:
             cue = threefive.Cue()
             cue = self._build_info_section(cue)
             cue = self._build_splice_command(cue)
+            cue.info_section.splice_command_type =cue.command.command_type
             cue = self._build_descriptor(cue)
             cue.encode()
         return cue
